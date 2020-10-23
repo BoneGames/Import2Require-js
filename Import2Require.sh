@@ -23,14 +23,16 @@ then
 fi
 
 function replace() {
-    if [ "$2" = require ] || [ ! -n "$2" ]         # Change Import to Require (default)
+    if [ "$2" = require ] || [ ! -n "$2" ]          # Change Import to Require (default)
     then
         echo "import to require"
         sed -i -E 's|import ([^{,*]+?) from ('.+?')|const \1 = require(\2)|g' "$1"    # replace import x from 'x'
         sed -i -E 's|import \{ (.+?) \} from ('.+?')|const \1 = require(\2)|g' "$1"   # replace import { x } from 'x'
         sed -i -E 's|import \{(.+?)\} from ('.+?')|const \1 = require(\2)|g' "$1"     # replace import {x} from 'x'
         sed -i -E 's|import \* as (.+?) from ('.+?')|const \1 = require(\2)|g' "$1"   # replace import * as x from 'x'
-    elif [ "$2" = import ]                    # Change Require to Import
+
+        sed -i -E 's|export (.+?\(\) {)|\1' "$1"                                      # replace exported methods export 'x' function()
+    elif [ "$2" = import ]                          # Change Require to Import
     then
         echo "require to import"
         sed -i -E 's|const (.+?) = require\(('.+?')\)|import \1 from \2|g' "$1"       # replace const x = require('x')
