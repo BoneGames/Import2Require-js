@@ -47,8 +47,12 @@ then
     replace "$1" "$2"
 else
     cd $(realpath "$1")
-    echo $PWD
-    FILES=$(find $PWD -type f -name '*')
-    for FILE in *; do replace "$FILE" "$2"; done
+    # echo $PWD
+    OIFS="$IFS"
+    IFS=$'\n'
+    FILES=$(find . -name "*.js");
+    for file in $FILES; do replace "$file" $2; done
+    IFS="$OIFS"
+    
 fi
 
