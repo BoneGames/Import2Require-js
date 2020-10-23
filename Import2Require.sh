@@ -1,12 +1,9 @@
 #!/bin/bash
 
-
-echo $1
-# sed -i -E 's|import ([^{,*]+?) from ('.+?')|const \1 = require(\2)|g' "$1"
-
+# Init input
 input=""
 
-# check if argument 1 is a file
+# check if argument 1 is a file/directory
 if [ -f "$1" ]
 then
     input="file"
@@ -26,14 +23,12 @@ then
 fi
 
 function replace() {
-    echo "2: $2"
-    echo $1
-    if [ "$2" = require ] || [ ! -n "$2" ]         # Change Import to Require
+    if [ "$2" = require ] || [ ! -n "$2" ]         # Change Import to Require (default)
     then
         echo "import to require"
-        sed -i -E 's|import ([^{,*]+?) from ('.+?')|const \1 = require(\2)|g' "$1"    # replace import x from 'x' syntax
-        sed -i -E 's|import \{ (.+?) \} from ('.+?')|const \1 = require(\2)|g' "$1"   # replace import { x } from 'x' syntax
-        sed -i -E 's|import \{(.+?)\} from ('.+?')|const \1 = require(\2)|g' "$1"     # replace import {x} from 'x' syntax (without spaces on curly braces)
+        sed -i -E 's|import ([^{,*]+?) from ('.+?')|const \1 = require(\2)|g' "$1"    # replace import x from 'x'
+        sed -i -E 's|import \{ (.+?) \} from ('.+?')|const \1 = require(\2)|g' "$1"   # replace import { x } from 'x'
+        sed -i -E 's|import \{(.+?)\} from ('.+?')|const \1 = require(\2)|g' "$1"     # replace import {x} from 'x'
         sed -i -E 's|import \* as (.+?) from ('.+?')|const \1 = require(\2)|g' "$1"   # replace import * as x from 'x'
     elif [ "$2" = import ]                    # Change Require to Import
     then
@@ -47,12 +42,19 @@ then
     replace "$1" "$2"
 else
     cd $(realpath "$1")
-    # echo $PWD
-    OIFS="$IFS"
-    IFS=$'\n'
-    FILES=$(find . -name "*.js");
-    for file in $FILES; do replace "$file" $2; done
-    IFS="$OIFS"
-    
-fi
 
+    # Store Internal Field Separator var
+    OIFS="$IFS"
+    
+    # Set IFS to new line
+    IFS=$'\n'
+
+    # get all javascript files
+    FILES=$(find . -name "*.js");
+
+    # loop through .js files and run replace function
+    for file in $FILES; do replace "$file" $2; done
+
+    # Set IFS back to original value
+    IFS="$OIFS"
+fi
